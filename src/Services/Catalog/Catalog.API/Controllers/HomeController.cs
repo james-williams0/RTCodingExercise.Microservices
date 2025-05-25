@@ -1,10 +1,9 @@
-﻿namespace Catalog.API.Controllers
+﻿namespace Catalog.API.Controllers;
+
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    public IActionResult Index()
     {
-        public IActionResult Index()
-        {
-            return new RedirectResult("~/swagger");
-        }
+        return new RedirectResult("~/swagger");
     }
 }

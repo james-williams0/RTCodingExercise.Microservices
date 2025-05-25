@@ -1,22 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 
-namespace Catalog.API.Data
+namespace Catalog.API.Data;
+
+public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
-    public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+    public ApplicationDbContext CreateDbContext(string[] args)
     {
-        public ApplicationDbContext CreateDbContext(string[] args)
-        {
-            var config = new ConfigurationBuilder()
-               .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
-               .AddJsonFile("appsettings.json")
-               .AddEnvironmentVariables()
-               .Build();
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .Build();
 
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-            optionsBuilder.UseSqlServer(config["ConnectionString"], sqlServerOptionsAction: o => o.MigrationsAssembly("Catalog.API"));
+        optionsBuilder.UseSqlServer(config["ConnectionString"], sqlServerOptionsAction: o => o.MigrationsAssembly("Catalog.API"));
 
-            return new ApplicationDbContext(optionsBuilder.Options);
-        }
+        return new ApplicationDbContext(optionsBuilder.Options);
     }
 }

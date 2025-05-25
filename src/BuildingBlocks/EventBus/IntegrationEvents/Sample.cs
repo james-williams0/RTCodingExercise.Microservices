@@ -1,7 +1,6 @@
-﻿namespace IntegrationEvents
-{
-    public class Sample : IntegrationEvent
-    {
+﻿namespace IntegrationEvents;
 
-    }
+public class Sample : IntegrationEvent
+{
+
 }

@@ -1,6 +1,5 @@
-﻿namespace Catalog.API
+﻿namespace Catalog.API;
+
+public class AppSettings
 {
-    public class AppSettings
-    {
-    }
 }
