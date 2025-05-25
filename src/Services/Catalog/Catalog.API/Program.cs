@@ -11,15 +11,14 @@ try
     var host = BuildHost(configuration, args);
 
     Log.Information("Applying migrations ({ApplicationContext})...", AppName);
-    var webHost = host.Services.GetService<IWebHost>();
-    webHost!.MigrateDbContext<ApplicationDbContext>((context, services) =>
+    host.MigrateDbContext<ApplicationDbContext>((context, services) =>
     {
-        var env = services.GetService<IWebHostEnvironment>();
-        var logger = services.GetService<ILogger<ApplicationDbContextSeed>>();
-        var settings = services.GetService<IOptions<AppSettings>>();
+        var env = services.GetRequiredService<IWebHostEnvironment>();
+        var logger = services.GetRequiredService<ILogger<ApplicationDbContextSeed>>();
+        var settings = services.GetRequiredService<IOptions<AppSettings>>();
 
         new ApplicationDbContextSeed()
-            .SeedAsync(context, env!, logger!, settings!)
+            .SeedAsync(context, env, logger, settings)
             .Wait();
     });
 
