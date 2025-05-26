@@ -28,6 +28,11 @@ public class ApplicationDbContextSeed
 
     public async Task SeedCustomData(ApplicationDbContext context, IWebHostEnvironment env, ILogger<ApplicationDbContextSeed> logger)
     {
+        if (context.Plates.Any())
+        {
+            return;
+        }
+        
         try
         {
             var plates = ReadApplicationRoleFromJson(env.ContentRootPath, logger);

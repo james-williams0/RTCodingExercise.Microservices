@@ -17,7 +17,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://0.0.0.0:80
-      - ConnectionString=Server=sqldata;Database=RTCodingExercise.Services.CatalogDb;User Id=sa;Password=Pass@word
+      - ConnectionString=Server=sqldata;Database=RTCodingExercise.Services.CatalogDb;User Id=sa;Password=Pass@word;TrustServerCertificate=True;
       - EventBusConnection=rabbitmq
     ports:
       - "5101:80"

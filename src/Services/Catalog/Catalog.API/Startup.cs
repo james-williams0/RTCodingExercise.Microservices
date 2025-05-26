@@ -98,13 +98,6 @@ public class Startup
 
         app.UseStaticFiles();
 
-        // Make work identity server redirections in Edge and lastest versions of browers. WARN: Not valid in a production environment.
-        app.Use(async (context, next) =>
-        {
-            context.Response.Headers.Add("Content-Security-Policy", "script-src 'unsafe-inline'");
-            await next();
-        });
-
         app.UseForwardedHeaders();
 
         app.UseSwagger()
