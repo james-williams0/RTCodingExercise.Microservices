@@ -1,4 +1,5 @@
-﻿using Catalog.API.Models.Requests;
+﻿using Catalog.Domain.Api.Requests;
+using Catalog.Domain.Api.Responses;
 
 namespace Catalog.API.Controllers;
 
@@ -18,10 +19,19 @@ public class HomeController : Controller
         return new RedirectResult("~/swagger");
     }
     
-    
-    public IActionResult GetPagedPlates([FromQuery] PlatesApiRequest request)
+    [HttpGet]
+    [Route("/plates")]
+    public async Task<IActionResult> GetPagedPlates([FromQuery] PlatesApiRequest request)
     {
-        var response = _context.GetPlates(request.PageNumber, request.PageSize);
+        var plates = await _context.GetPlates(request.PageNumber, request.PageSize);
+        var totalCount = await _context.GetTotalCount();
+        var response = new PlatesApiResponse
+        {
+            Plates = plates,
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize,
+            TotalCount = totalCount
+        };
         return Ok(response);
     }
 }

@@ -3,17 +3,19 @@ using Xunit;
 using NSubstitute;
 using Catalog.API.Controllers;
 using Catalog.API.Data;
-using Catalog.API.Models.Requests;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Catalog.Domain;
+using Catalog.Domain.Api.Requests;
+using Catalog.Domain.Api.Responses;
 
 namespace Catalog.UnitTests.Controllers;
 
 public class HomeControllerTests
 {
     [Fact]
-    public void GetPagedPlates_WhenCalledWithPagedParameters_ThenCallsDbContextWithThoseParameters()
+    public async Task GetPagedPlates_WhenCalledWithPagedParameters_ThenCallsDbContextWithThoseParameters()
     {
         // Arrange
         var databaseContext = Substitute.For<IApplicationDbContext>();
@@ -23,27 +25,40 @@ public class HomeControllerTests
         databaseContext.GetPlates(2, 10).Returns(expectedPlates);
 
         // Act
-        var result = controller.GetPagedPlates(request);
+        await controller.GetPagedPlates(request);
 
         // Assert
-        databaseContext.Received(1).GetPlates(2, 10);
+        await databaseContext.Received(1).GetPlates(2, 10);
     }
 
     [Fact]
-    public void GetPagedPlates_WhenCalled_ThenReturnsOkWithPlates()
+    public async Task GetPagedPlates_WhenCalled_ThenReturnsOkWithPlates()
     {
         // Arrange
+        const int pageNumber = 1;
+        const int pageSize = 5;
+        
         var databaseContext = Substitute.For<IApplicationDbContext>();
         var controller = new HomeController(databaseContext);
-        var request = new PlatesApiRequest { PageNumber = 1, PageSize = 5 };
+        var request = new PlatesApiRequest { PageNumber = pageNumber, PageSize = pageSize };
         var expectedPlates = new List<Plate> { new() { Id = Guid.NewGuid(), Registration = Guid.NewGuid().ToString() } };
-        databaseContext.GetPlates(1, 5).Returns(expectedPlates);
+        
+        databaseContext.GetPlates(pageNumber, pageSize).Returns(expectedPlates);
+        databaseContext.GetTotalCount().Returns(expectedPlates.Count);
+        
+        var expectedResponse = new PlatesApiResponse
+        {
+            Plates = expectedPlates,
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            TotalCount = expectedPlates.Count
+        };
 
         // Act
-        var result = controller.GetPagedPlates(request);
+        var result = await controller.GetPagedPlates(request);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(expectedPlates, okResult.Value);
+        Assert.Equal(expectedResponse, okResult.Value as PlatesApiResponse);
     }
 }

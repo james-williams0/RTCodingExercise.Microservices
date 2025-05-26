@@ -7,13 +7,18 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     }
 
-    public List<Plate> GetPlates(int pageNumber, int pageSize)
+    public async Task<List<Plate>> GetPlates(int pageNumber, int pageSize)
     {
-        return Plates
+        return await Plates
             .OrderBy(p => p.Registration)
             .Skip(pageSize * (pageNumber - 1))
             .Take(pageSize)
-            .ToList();
+            .ToListAsync();
+    }
+    
+    public async Task<int> GetTotalCount()
+    {
+        return await Plates.CountAsync();
     }
 
     public DbSet<Plate> Plates { get; set; }

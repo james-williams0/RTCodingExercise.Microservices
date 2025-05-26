@@ -1,4 +1,6 @@
-﻿namespace Catalog.API.Models.Requests;
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace Catalog.Domain.Api.Requests;
 
 public record PlatesApiRequest
 {

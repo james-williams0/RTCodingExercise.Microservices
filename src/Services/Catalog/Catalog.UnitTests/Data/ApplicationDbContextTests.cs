@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Catalog.API.Data;
 using Catalog.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -12,18 +13,18 @@ public class ApplicationDbContextTests
 {
     private static List<Plate> GenerateRandomPlates(int count)
     {
-        var rnd = new Random(418);
+        var random = new Random(418);
         var plates = new List<Plate>();
         for (var i = 0; i < count; i++)
         {
             var letters = Guid.NewGuid().ToString();
-            var numbers = rnd.Next(1000, 9999);
+            var numbers = random.Next(1000, 9999);
             plates.Add(new Plate
             {
                 Id = Guid.NewGuid(),
                 Registration = $"{letters}{numbers}",
-                PurchasePrice = rnd.Next(1, 1000),
-                SalePrice = rnd.Next(1, 1000),
+                PurchasePrice = random.Next(1, 1000),
+                SalePrice = random.Next(1, 1000),
                 Letters = letters,
                 Numbers = numbers
             });
@@ -34,7 +35,7 @@ public class ApplicationDbContextTests
     [Theory]
     [InlineData(1, 10)]
     [InlineData(2, 5)]
-    public void GetPlates_WhenPaged_ThenReturnsExpectedPage(int pageNumber, int pageSize)
+    public async Task GetPlates_WhenPaged_ThenReturnsExpectedPage(int pageNumber, int pageSize)
     {
         // Arrange
         var plates = GenerateRandomPlates(30);
@@ -43,12 +44,12 @@ public class ApplicationDbContextTests
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(database)
             .Options;
-        using var dbContext = new ApplicationDbContext(options);
-        dbContext.Plates.AddRange(plates);
-        dbContext.SaveChanges();
+        await using var dbContext = new ApplicationDbContext(options);
+        await dbContext.Plates.AddRangeAsync(plates);
+        await dbContext.SaveChangesAsync();
 
         // Act
-        var result = dbContext.GetPlates(pageNumber, pageSize);
+        var result = await dbContext.GetPlates(pageNumber, pageSize);
 
         // Assert
         Assert.Equal(pageSize, result.Count);
@@ -56,5 +57,25 @@ public class ApplicationDbContextTests
         var actualPlatesIds = result.Select(p => p.Id);
         Assert.Equal(expectedPlateIds, actualPlatesIds);
     }
-}
 
+    [Fact]
+    public async Task GetTotalCount_WhenCalled_ThenReturnsExpectedCount()
+    {
+        // Arrange
+        var plates = GenerateRandomPlates(15);
+        var database = Guid.NewGuid().ToString();
+        
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(database)
+            .Options;
+        await using var dbContext = new ApplicationDbContext(options);
+        await dbContext.Plates.AddRangeAsync(plates);
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var count = await dbContext.GetTotalCount();
+
+        // Assert
+        Assert.Equal(plates.Count, count);
+    }
+}
