@@ -9,7 +9,11 @@ public class ApplicationDbContext : DbContext
 
     public List<Plate> GetPlates(int pageNumber, int pageSize)
     {
-        throw new NotImplementedException();
+        return Plates
+            .OrderBy(p => p.Registration)
+            .Skip(pageSize * (pageNumber - 1))
+            .Take(pageSize)
+            .ToList();
     }
 
     public DbSet<Plate> Plates { get; set; }
