@@ -21,6 +21,7 @@ public class HomeController : Controller
     
     public IActionResult GetPagedPlates([FromQuery] PlatesApiRequest request)
     {
-        throw new NotImplementedException();
+        var response = _context.GetPlates(request.PageNumber, request.PageSize);
+        return Ok(response);
     }
 }
