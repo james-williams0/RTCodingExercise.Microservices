@@ -1,12 +1,12 @@
-using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Catalog.Domain;
 using Catalog.API.Data;
+using Catalog.Domain;
 using Microsoft.EntityFrameworkCore;
+using Xunit;
 
-namespace Catalog.UnitTests;
+namespace Catalog.UnitTests.Data;
 
 public class ApplicationDbContextTests
 {
