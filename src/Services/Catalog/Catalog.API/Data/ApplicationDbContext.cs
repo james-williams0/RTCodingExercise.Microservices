@@ -7,5 +7,10 @@ public class ApplicationDbContext : DbContext
 
     }
 
+    public List<Plate> GetPlates(int pageNumber, int pageSize)
+    {
+        throw new NotImplementedException();
+    }
+
     public DbSet<Plate> Plates { get; set; }
 }
