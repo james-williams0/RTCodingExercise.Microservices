@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Catalog.API.Data;
+using Catalog.API.Services;
 using Catalog.Domain;
 using Catalog.Domain.Api.Requests.Enums;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using Xunit;
 
 namespace Catalog.UnitTests.Data;
@@ -100,5 +102,61 @@ public class ApplicationDbContextTests
 
         // Assert
         Assert.Equal(expectedCount, actualCount);
+    }
+
+    [Fact]
+    public async Task GetPlates_WhenSearched_ThenReturnsMatchingPlates()
+    {
+        // Arrange
+        var searchTerm = Guid.NewGuid().ToString();
+        var database = Guid.NewGuid().ToString();
+        var plates = GenerateRandomPlates(1);
+        
+        var searcher = Substitute.For<IPlateFuzzySearcher>();
+        searcher.IsMatch(Arg.Any<string>(), Arg.Any<string>()).Returns(true);
+        
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(database)
+            .Options;
+        await using var dbContext = new ApplicationDbContext(options);
+        await dbContext.Plates.AddRangeAsync(plates);
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await dbContext.GetPlates(1, 10);
+
+        // Assert
+        searcher.Received(1).IsMatch(
+            Arg.Is<string>(s => s == plates[0].Registration),
+            Arg.Is<string>(s => s == searchTerm));
+        Assert.Equal(result.Count, plates.Count);
+    }
+    
+    [Fact]
+    public async Task GetPlates_WhenSearched_ThenDoesNotReturnsNonMatchingPlates()
+    {
+        // Arrange
+        var searchTerm = Guid.NewGuid().ToString();
+        var database = Guid.NewGuid().ToString();
+        var plates = GenerateRandomPlates(1);
+        
+        var searcher = Substitute.For<IPlateFuzzySearcher>();
+        searcher.IsMatch(Arg.Any<string>(), Arg.Any<string>()).Returns(true);
+        
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(database)
+            .Options;
+        await using var dbContext = new ApplicationDbContext(options);
+        await dbContext.Plates.AddRangeAsync(plates);
+        await dbContext.SaveChangesAsync();
+
+        // Act
+        var result = await dbContext.GetPlates(1, 10);
+
+        // Assert
+        searcher.Received(1).IsMatch(
+            Arg.Is<string>(s => s == plates[0].Registration),
+            Arg.Is<string>(s => s == searchTerm));
+        Assert.Empty(result);
     }
 }
