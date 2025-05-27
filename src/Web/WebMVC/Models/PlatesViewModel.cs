@@ -28,4 +28,6 @@ public record PlatesViewModel
     public string SortBy { get; init; } = "Alphabetical";
     
     public string OrderBy { get; init; } = "Asc";
+
+    public string? SearchTerm { get; init; }
 }

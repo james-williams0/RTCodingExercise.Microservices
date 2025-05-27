@@ -26,14 +26,20 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
         var searchedPlates = string.IsNullOrWhiteSpace(searchTerm)
             ? Plates
-            : Plates.Where(p => _plateFuzzySearcher.IsMatch(p.Registration, searchTerm));
+            : Plates
+                .AsEnumerable()
+                .Where(p => _plateFuzzySearcher.IsMatch(p.Registration, searchTerm))
+                .AsQueryable();
         
         var orderedPlates = OrderPlatesBy(searchedPlates, sortBy, orderBy);
         
-        return await orderedPlates
+        var pagedPlates = orderedPlates
             .Skip(pageSize * (pageNumber - 1))
-            .Take(pageSize)
-            .ToListAsync();
+            .Take(pageSize);
+            
+        return string.IsNullOrWhiteSpace(searchTerm)
+            ? await pagedPlates.ToListAsync()
+            : pagedPlates.ToList();
     }
     
     public async Task<int> GetTotalCount()

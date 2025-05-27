@@ -24,17 +24,28 @@ public class PlatesApiService
         _plateViewModelMapper = plateViewModelMapper;
     }
 
-    public async Task<PlatesViewModel> GetPagedPlatesAsync(int pageNumber, int pageSize, string sortBy = "Alphabetical", string orderBy = "Asc")
+    public async Task<PlatesViewModel> GetPagedPlatesAsync(
+        int pageNumber,
+        int pageSize,
+        string sortBy = "Alphabetical",
+        string orderBy = "Asc",
+        string? searchTerm = null)
     {
         var request = new PlatesApiRequest
         {
             PageNumber = pageNumber,
             PageSize = pageSize,
             SortBy = Enum.Parse<SortBy>(sortBy, true),
-            OrderBy = Enum.Parse<OrderBy>(orderBy, true)
+            OrderBy = Enum.Parse<OrderBy>(orderBy, true),
+            SearchTerm = searchTerm
         };
         var pagedPlates = await _catalogApi.GetPagedPlatesAsync(request);
         var platesViewModel = _plateViewModelMapper.Map(pagedPlates);
-        return platesViewModel with { SortBy = sortBy, OrderBy = orderBy };
+        return platesViewModel with
+        {
+            SortBy = sortBy,
+            OrderBy = orderBy,
+            SearchTerm = searchTerm
+        };
     }
 }

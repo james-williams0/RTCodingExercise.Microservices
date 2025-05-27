@@ -17,7 +17,12 @@ public class HomeController : Controller
         _platesApiService = platesApiService;
     }
 
-    public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 20, string sortBy = "Alphabetical", string orderBy = "Asc")
+    public async Task<IActionResult> Index(
+        int pageNumber = 1,
+        int pageSize = 20,
+        string sortBy = "Alphabetical",
+        string orderBy = "Asc",
+        string? searchTerm = null)
     {
         // Parse sortBy and orderBy to enums, fallback to defaults if invalid
         sortBy = sortBy.Equals("Price", StringComparison.OrdinalIgnoreCase) ? "Price" : "Alphabetical";
@@ -27,7 +32,8 @@ public class HomeController : Controller
             pageNumber,
             pageSize,
             sortBy,
-            orderBy);
+            orderBy,
+            searchTerm);
         return View(pagedPlates);
     }
 

@@ -8,6 +8,12 @@
     <h1 class="display-4">Number Plates</h1>
 </div>
 
+<form method="get">
+    <div class="input-group">
+        <input type="text" name="searchTerm" class="form-control" placeholder="Search" value="@Model.SearchTerm" />
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>

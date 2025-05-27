@@ -9,6 +9,7 @@ public class PlateFuzzySearcherTests
     [InlineData("Danny", "DA12 NNY")]
     [InlineData("G Smith", "GSM 17H")]
     [InlineData("James", "JAM 3S")]
+    [InlineData("Basal", "BAS4L")]
     public void GivenAPlate_WhenSearchingForRegistration_ThenReturnsTrueIfRegistrationIsSimilar(
         string searchTerm,
         string registration)
