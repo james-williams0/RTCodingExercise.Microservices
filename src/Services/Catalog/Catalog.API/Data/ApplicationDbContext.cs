@@ -1,4 +1,6 @@
-﻿namespace Catalog.API.Data;
+﻿using Catalog.Domain.Api.Requests.Enums;
+
+namespace Catalog.API.Data;
 
 public class ApplicationDbContext : DbContext, IApplicationDbContext
 {
@@ -7,7 +9,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
     }
 
-    public async Task<List<Plate>> GetPlates(int pageNumber, int pageSize)
+    public async Task<List<Plate>> GetPlates(
+        int pageNumber,
+        int pageSize,
+        SortBy sortBy = SortBy.Alphabetical,
+        OrderBy orderBy = OrderBy.Asc)
     {
         return await Plates
             .OrderBy(p => p.Registration)
@@ -15,7 +21,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .Take(pageSize)
             .ToListAsync();
     }
-    
+
     public async Task<int> GetTotalCount()
     {
         return await Plates.CountAsync();

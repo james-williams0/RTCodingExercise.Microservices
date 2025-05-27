@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Catalog.API.Data;
 using Catalog.Domain;
+using Catalog.Domain.Api.Requests.Enums;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -33,9 +34,19 @@ public class ApplicationDbContextTests
     }
 
     [Theory]
-    [InlineData(1, 10)]
-    [InlineData(2, 5)]
-    public async Task GetPlates_WhenPaged_ThenReturnsExpectedPage(int pageNumber, int pageSize)
+    [InlineData(1, 10, SortBy.Alphabetical, OrderBy.Asc)]
+    [InlineData(2, 5, SortBy.Alphabetical, OrderBy.Asc)]
+    [InlineData(1, 10, SortBy.Price, OrderBy.Asc)]
+    [InlineData(2, 5, SortBy.Price, OrderBy.Asc)]
+    [InlineData(1, 10, SortBy.Alphabetical, OrderBy.Desc)]
+    [InlineData(2, 5, SortBy.Alphabetical, OrderBy.Desc)]
+    [InlineData(1, 10, SortBy.Price, OrderBy.Desc)]
+    [InlineData(2, 5, SortBy.Price, OrderBy.Desc)]
+    public async Task GetPlates_WhenPaged_ThenReturnsExpectedPage(
+        int pageNumber,
+        int pageSize,
+        SortBy sortBy,
+        OrderBy orderBy)
     {
         // Arrange
         var plates = GenerateRandomPlates(30);
@@ -49,11 +60,21 @@ public class ApplicationDbContextTests
         await dbContext.SaveChangesAsync();
 
         // Act
-        var result = await dbContext.GetPlates(pageNumber, pageSize);
+        var result = await dbContext.GetPlates(pageNumber, pageSize, sortBy, orderBy);
 
         // Assert
         Assert.Equal(pageSize, result.Count);
-        var expectedPlateIds = plates.OrderBy(p => p.Registration).Skip(pageSize * (pageNumber - 1)).Take(pageSize).Select(p => p.Id);
+
+        var orderedPlates = (sortBy, orderBy) switch
+        {
+            (SortBy.Alphabetical, OrderBy.Asc) => plates.OrderBy(p => p.Registration),
+            (SortBy.Price, OrderBy.Asc) => plates.OrderBy(p => p.SalePrice),
+            (SortBy.Alphabetical, OrderBy.Desc) => plates.OrderByDescending(p => p.Registration),
+            (SortBy.Price, OrderBy.Desc) => plates.OrderByDescending(p => p.SalePrice),
+            _ => throw new InvalidOperationException("Sort/order combination untested")
+        };
+        
+        var expectedPlateIds = orderedPlates.Skip(pageSize * (pageNumber - 1)).Take(pageSize).Select(p => p.Id);
         var actualPlatesIds = result.Select(p => p.Id);
         Assert.Equal(expectedPlateIds, actualPlatesIds);
     }
@@ -62,7 +83,9 @@ public class ApplicationDbContextTests
     public async Task GetTotalCount_WhenCalled_ThenReturnsExpectedCount()
     {
         // Arrange
-        var plates = GenerateRandomPlates(15);
+        const int expectedCount = 15;
+        
+        var plates = GenerateRandomPlates(expectedCount);
         var database = Guid.NewGuid().ToString();
         
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -73,9 +96,9 @@ public class ApplicationDbContextTests
         await dbContext.SaveChangesAsync();
 
         // Act
-        var count = await dbContext.GetTotalCount();
+        var actualCount = await dbContext.GetTotalCount();
 
         // Assert
-        Assert.Equal(plates.Count, count);
+        Assert.Equal(expectedCount, actualCount);
     }
 }
