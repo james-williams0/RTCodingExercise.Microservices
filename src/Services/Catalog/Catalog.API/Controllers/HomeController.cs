@@ -24,7 +24,9 @@ public class HomeController : Controller
     [Route("/plates")]
     public async Task<IActionResult> GetPagedPlates([FromQuery] PlatesApiRequest request)
     {
-        var plates = await _context.GetPlates(request.PageNumber, request.PageSize);
+        var plates = await _context.GetPlates(
+            request.PageNumber, 
+            request.PageSize);
         var totalCount = await _context.GetTotalCount();
         var response = new PlatesApiResponse
         {

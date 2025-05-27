@@ -1,5 +1,8 @@
 ﻿using MassTransit;
 using RabbitMQ.Client;
+using Refit;
+using RTCodingExercise.Microservices.Services;
+using WebMVC.Services;
 
 namespace RTCodingExercise.WebMVC;
 
@@ -45,6 +48,13 @@ public class Startup
         });
 
         services.AddMassTransitHostedService();
+
+        services
+            .AddRefitClient<ICatalogApi>()
+            .ConfigureHttpClient(c =>
+                c.BaseAddress = new Uri(Configuration["CatalogApiUrl"] ?? "http://localhost:5160"));
+        services.AddScoped<PlatesApiService>();
+        services.AddScoped<IPlateViewModelMapper, PlatesViewModelMapper>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
