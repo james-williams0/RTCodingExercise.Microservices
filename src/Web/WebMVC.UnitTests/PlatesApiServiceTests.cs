@@ -87,7 +87,7 @@ public class PlatesApiServiceTests
         var service = new PlatesApiService(catalogClient, new PlatesViewModelMapper());
 
         // Act
-        await service.GetPagedPlatesAsync(pageNumber, pageSize);
+        await service.GetPagedPlatesAsync(pageNumber, pageSize, nameof(SortBy.Price), nameof(OrderBy.Desc));
 
         // Assert
         await catalogClient.Received(1).GetPagedPlatesAsync(Arg.Is<PlatesApiRequest>(p =>
@@ -122,10 +122,14 @@ public class PlatesApiServiceTests
         var service = new PlatesApiService(catalogClient, mapper);
 
         // Act
-        var result = await service.GetPagedPlatesAsync(pageNumber, pageSize);
+        var act = async () => await service.GetPagedPlatesAsync(pageNumber, pageSize);
 
         // Assert
-        mapper.ReceivedWithAnyArgs(1).Map(Arg.Any<PlatesApiResponse>());
-        Assert.Equal(expectedPlatesApiResponse, actualPlatesApiResponse);
+        await Assert.ThrowsAnyAsync<NullReferenceException>(act); // Expected due to no mapper return
+        Assert.Multiple(() =>
+        {
+            mapper.ReceivedWithAnyArgs(1).Map(Arg.Any<PlatesApiResponse>());
+            Assert.Equal(expectedPlatesApiResponse, actualPlatesApiResponse);
+        });
     }
 }

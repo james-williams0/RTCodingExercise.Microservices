@@ -24,4 +24,8 @@ public record PlatesViewModel
     public required int TotalCount { get; init; }
     
     public int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+    
+    public string SortBy { get; init; } = "Alphabetical";
+    
+    public string OrderBy { get; init; } = "Asc";
 }

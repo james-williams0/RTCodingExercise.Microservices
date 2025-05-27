@@ -17,11 +17,17 @@ public class HomeController : Controller
         _platesApiService = platesApiService;
     }
 
-    public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 20)
+    public async Task<IActionResult> Index(int pageNumber = 1, int pageSize = 20, string sortBy = "Alphabetical", string orderBy = "Asc")
     {
+        // Parse sortBy and orderBy to enums, fallback to defaults if invalid
+        sortBy = sortBy.Equals("Price", StringComparison.OrdinalIgnoreCase) ? "Price" : "Alphabetical";
+        orderBy = orderBy.Equals("Desc", StringComparison.OrdinalIgnoreCase) ? "Desc" : "Asc";
+
         var pagedPlates = await _platesApiService.GetPagedPlatesAsync(
             pageNumber,
-            pageSize);
+            pageSize,
+            sortBy,
+            orderBy);
         return View(pagedPlates);
     }
 

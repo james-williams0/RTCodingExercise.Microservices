@@ -11,9 +11,23 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Registration</th>
+            <th>
+                <a href="?sortBy=Alphabetical&orderBy=@(Model is { SortBy: "Alphabetical", OrderBy: "Asc" } ? "Desc" : "Asc")&pageNumber=@Model.PageNumber&pageSize=@Model.PageSize">
+                    Registration
+                    @if (Model.SortBy == "Alphabetical") {
+                        <span>(@((Model.OrderBy == "Asc") ? "Ascending" : "Descending"))</span>
+                    }
+                </a>
+            </th>
             <th>Purchase Price</th>
-            <th>Sale Price</th>
+            <th>
+                <a href="?sortBy=Price&orderBy=@(Model is { SortBy: "Price", OrderBy: "Asc" } ? "Desc" : "Asc")&pageNumber=@Model.PageNumber&pageSize=@Model.PageSize">
+                    Sale Price
+                    @if (Model.SortBy == "Price") {
+                        <span>(@((Model.OrderBy == "Asc") ? "Ascending" : "Descending"))</span>
+                    }
+                </a>
+            </th>
         </tr>
     </thead>
     <tbody>

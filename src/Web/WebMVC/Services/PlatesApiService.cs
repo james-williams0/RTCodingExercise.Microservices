@@ -1,4 +1,5 @@
 using Catalog.Domain.Api.Requests;
+using Catalog.Domain.Api.Requests.Enums;
 using Catalog.Domain.Api.Responses;
 using Refit;
 using RTCodingExercise.Microservices.Models;
@@ -23,14 +24,17 @@ public class PlatesApiService
         _plateViewModelMapper = plateViewModelMapper;
     }
 
-    public async Task<PlatesViewModel> GetPagedPlatesAsync(int pageNumber, int pageSize)
+    public async Task<PlatesViewModel> GetPagedPlatesAsync(int pageNumber, int pageSize, string sortBy = "Alphabetical", string orderBy = "Asc")
     {
-        var pagedPlates = await _catalogApi.GetPagedPlatesAsync(new PlatesApiRequest
+        var request = new PlatesApiRequest
         {
             PageNumber = pageNumber,
-            PageSize = pageSize
-        });
+            PageSize = pageSize,
+            SortBy = Enum.Parse<SortBy>(sortBy, true),
+            OrderBy = Enum.Parse<OrderBy>(orderBy, true)
+        };
+        var pagedPlates = await _catalogApi.GetPagedPlatesAsync(request);
         var platesViewModel = _plateViewModelMapper.Map(pagedPlates);
-        return platesViewModel;
+        return platesViewModel with { SortBy = sortBy, OrderBy = orderBy };
     }
 }

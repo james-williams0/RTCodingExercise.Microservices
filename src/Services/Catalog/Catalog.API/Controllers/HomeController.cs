@@ -26,7 +26,9 @@ public class HomeController : Controller
     {
         var plates = await _context.GetPlates(
             request.PageNumber, 
-            request.PageSize);
+            request.PageSize,
+            request.SortBy,
+            request.OrderBy);
         var totalCount = await _context.GetTotalCount();
         var response = new PlatesApiResponse
         {
