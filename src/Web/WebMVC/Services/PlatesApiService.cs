@@ -1,3 +1,4 @@
+using Catalog.Domain.Api.Requests;
 using Catalog.Domain.Api.Responses;
 using Refit;
 using RTCodingExercise.Microservices.Models;
@@ -8,7 +9,7 @@ namespace WebMVC.Services;
 public interface ICatalogApi
 {
     [Get("/plates")]
-    Task<PlatesApiResponse> GetPagedPlatesAsync([Query] int pageNumber, [Query] int pageSize);
+    Task<PlatesApiResponse> GetPagedPlatesAsync([Query] PlatesApiRequest request);
 }
 
 public class PlatesApiService
@@ -24,7 +25,11 @@ public class PlatesApiService
 
     public async Task<PlatesViewModel> GetPagedPlatesAsync(int pageNumber, int pageSize)
     {
-        var pagedPlates = await _catalogApi.GetPagedPlatesAsync(pageNumber, pageSize);
+        var pagedPlates = await _catalogApi.GetPagedPlatesAsync(new PlatesApiRequest
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        });
         var platesViewModel = _plateViewModelMapper.Map(pagedPlates);
         return platesViewModel;
     }
