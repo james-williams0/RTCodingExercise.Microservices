@@ -61,4 +61,36 @@ public class HomeControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(expectedResponse, okResult.Value as PlatesApiResponse);
     }
+
+    [Fact]
+    public async Task GetPagedPlates_WhenSearchTermProvided_PassesSearchTermToDbContext()
+    {
+        // Arrange
+        var searchTerm = Guid.NewGuid().ToString();
+        
+        var databaseContext = Substitute.For<IApplicationDbContext>();
+        var controller = new HomeController(databaseContext);
+        var request = new PlatesApiRequest
+        {
+            PageNumber = 1,
+            PageSize = 10,
+            SearchTerm = searchTerm
+        };
+        List<Plate> expectedPlates =
+        [
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Registration = searchTerm
+            }
+        ];
+        databaseContext.GetPlates(1, 10, default, default, searchTerm).Returns(expectedPlates);
+        databaseContext.GetTotalCount().Returns(expectedPlates.Count);
+
+        // Act
+        await controller.GetPagedPlates(request);
+
+        // Assert
+        await databaseContext.Received(1).GetPlates(1, 10, default, default, searchTerm);
+    }
 }
