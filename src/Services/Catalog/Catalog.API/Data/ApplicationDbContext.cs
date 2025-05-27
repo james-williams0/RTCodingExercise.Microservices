@@ -8,6 +8,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
 
     }
+    
+    public DbSet<Plate> Plates { get; set; }
 
     public async Task<List<Plate>> GetPlates(
         int pageNumber,
@@ -15,17 +17,28 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
         SortBy sortBy = SortBy.Alphabetical,
         OrderBy orderBy = OrderBy.Asc)
     {
-        return await Plates
-            .OrderBy(p => p.Registration)
+        var orderedPlates = OrderPlatesBy(sortBy, orderBy);
+        
+        return await orderedPlates
             .Skip(pageSize * (pageNumber - 1))
             .Take(pageSize)
             .ToListAsync();
     }
-
+    
     public async Task<int> GetTotalCount()
     {
         return await Plates.CountAsync();
     }
 
-    public DbSet<Plate> Plates { get; set; }
+    private IOrderedQueryable<Plate> OrderPlatesBy(SortBy sortBy, OrderBy orderBy)
+    {
+        return (sortBy, orderBy) switch
+        {
+            (SortBy.Alphabetical, OrderBy.Asc) => Plates.OrderBy(p => p.Registration),
+            (SortBy.Price, OrderBy.Asc) => Plates.OrderBy(p => p.SalePrice),
+            (SortBy.Alphabetical, OrderBy.Desc) => Plates.OrderByDescending(p => p.Registration),
+            (SortBy.Price, OrderBy.Desc) => Plates.OrderByDescending(p => p.SalePrice),
+            _ => Plates.OrderBy(p => p.Registration)
+        };
+    }
 }
