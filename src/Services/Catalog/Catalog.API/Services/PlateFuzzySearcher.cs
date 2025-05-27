@@ -5,7 +5,7 @@ namespace Catalog.API.Services;
 
 public interface IPlateFuzzySearcher
 {
-    bool IsMatch(string registration, string searchTerm);
+    bool IsMatch(string? registration, string searchTerm);
 }
 
 public class PlateFuzzySearcher : IPlateFuzzySearcher
@@ -23,9 +23,9 @@ public class PlateFuzzySearcher : IPlateFuzzySearcher
         {'Z', ['2', 'Z'] },
     };
 
-    public bool IsMatch(string registration, string searchTerm)
+    public bool IsMatch(string? registration, string searchTerm)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm))
+        if (string.IsNullOrWhiteSpace(searchTerm) || string.IsNullOrWhiteSpace(registration))
         {
             return false;
         }

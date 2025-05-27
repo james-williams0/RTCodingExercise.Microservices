@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using Catalog.API.Services;
+using MassTransit;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 
@@ -76,6 +77,8 @@ public class Startup
         });
 
         services.AddMassTransitHostedService();
+
+        services.AddSingleton<IPlateFuzzySearcher, PlateFuzzySearcher>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

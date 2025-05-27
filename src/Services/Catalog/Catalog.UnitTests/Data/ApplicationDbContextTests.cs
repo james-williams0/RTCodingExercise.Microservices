@@ -57,7 +57,7 @@ public class ApplicationDbContextTests
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(database)
             .Options;
-        await using var dbContext = new ApplicationDbContext(options);
+        await using var dbContext = new ApplicationDbContext(options, new PlateFuzzySearcher());
         await dbContext.Plates.AddRangeAsync(plates);
         await dbContext.SaveChangesAsync();
 
@@ -93,7 +93,7 @@ public class ApplicationDbContextTests
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(database)
             .Options;
-        await using var dbContext = new ApplicationDbContext(options);
+        await using var dbContext = new ApplicationDbContext(options, new PlateFuzzySearcher());
         await dbContext.Plates.AddRangeAsync(plates);
         await dbContext.SaveChangesAsync();
 
@@ -118,12 +118,12 @@ public class ApplicationDbContextTests
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(database)
             .Options;
-        await using var dbContext = new ApplicationDbContext(options);
+        await using var dbContext = new ApplicationDbContext(options, searcher);
         await dbContext.Plates.AddRangeAsync(plates);
         await dbContext.SaveChangesAsync();
 
         // Act
-        var result = await dbContext.GetPlates(1, 10);
+        var result = await dbContext.GetPlates(1, 10, searchTerm: searchTerm);
 
         // Assert
         searcher.Received(1).IsMatch(
@@ -141,17 +141,17 @@ public class ApplicationDbContextTests
         var plates = GenerateRandomPlates(1);
         
         var searcher = Substitute.For<IPlateFuzzySearcher>();
-        searcher.IsMatch(Arg.Any<string>(), Arg.Any<string>()).Returns(true);
+        searcher.IsMatch(Arg.Any<string>(), Arg.Any<string>()).Returns(false);
         
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(database)
             .Options;
-        await using var dbContext = new ApplicationDbContext(options);
+        await using var dbContext = new ApplicationDbContext(options, searcher);
         await dbContext.Plates.AddRangeAsync(plates);
         await dbContext.SaveChangesAsync();
 
         // Act
-        var result = await dbContext.GetPlates(1, 10);
+        var result = await dbContext.GetPlates(1, 10, searchTerm: searchTerm);
 
         // Assert
         searcher.Received(1).IsMatch(

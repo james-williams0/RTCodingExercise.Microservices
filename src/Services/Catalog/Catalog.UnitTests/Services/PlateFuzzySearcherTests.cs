@@ -38,4 +38,20 @@ public class PlateFuzzySearcherTests
         // Assert
         Assert.False(result);
     }
+
+    [Fact]
+    public void GivenAPlate_WhenSearchingForRegistration_ThenReturnsFalseIfRegistrationIsNull()
+    {
+        // Arrange
+        const string? registration = null;
+        const string searchTerm = "Dave";
+
+        var searcher = new PlateFuzzySearcher();
+
+        // Act
+        var result = searcher.IsMatch(registration, searchTerm);
+
+        // Assert
+        Assert.False(result);
+    }
 }
