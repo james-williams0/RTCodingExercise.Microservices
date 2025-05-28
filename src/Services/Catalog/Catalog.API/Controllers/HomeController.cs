@@ -40,4 +40,11 @@ public class HomeController : Controller
         };
         return Ok(response);
     }
+    
+    [HttpPost]
+    [Route("/plates/reserve")]
+    public async Task<IActionResult> ReservePlates([FromBody] Guid plateId)
+    {
+        return NoContent();
+    }
 }

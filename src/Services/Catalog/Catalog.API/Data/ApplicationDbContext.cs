@@ -16,6 +16,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     }
     
     public DbSet<Plate> Plates { get; set; }
+    public DbSet<PlateStatus> PlateStatuses { get; set; }
 
     public async Task<List<Plate>> GetPlates(
         int pageNumber,
@@ -41,7 +42,22 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             ? await pagedPlates.ToListAsync()
             : pagedPlates.ToList();
     }
-    
+
+    public Task<bool> ReservePlate(Guid plateId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> SellPlate(Guid plateId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> UnreservePlate(Guid plateId)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<int> GetTotalCount()
     {
         return await Plates.CountAsync();
@@ -57,5 +73,20 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             (SortBy.Price, OrderBy.Desc) => plates.OrderByDescending(p => p.SalePrice),
             _ => plates.OrderBy(p => p.Registration)
         };
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<PlateStatus>(entity =>
+        {
+            entity.HasKey(ps => ps.Id);
+            entity.HasOne(ps => ps.Plate)
+                .WithOne()
+                .HasForeignKey<PlateStatus>(ps => ps.Id)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(ps => ps.Status)
+                .IsRequired();
+        });
     }
 }

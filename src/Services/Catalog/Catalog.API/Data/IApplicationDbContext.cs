@@ -11,5 +11,11 @@ public interface IApplicationDbContext
         OrderBy orderBy = OrderBy.Asc,
         string? searchTerm = null);
     
+    Task<bool> ReservePlate(Guid plateId);
+    
+    Task<bool> SellPlate(Guid plateId);
+    
+    Task<bool> UnreservePlate(Guid plateId);
+    
     Task<int> GetTotalCount();
 }

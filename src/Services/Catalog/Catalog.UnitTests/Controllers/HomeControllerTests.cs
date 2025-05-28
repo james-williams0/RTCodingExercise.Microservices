@@ -93,4 +93,19 @@ public class HomeControllerTests
         // Assert
         await databaseContext.Received(1).GetPlates(1, 10, default, default, searchTerm);
     }
+    
+    [Fact]
+    public async Task ReservePlates_WhenCalled_ThenCallsDbContextWithPlateId()
+    {
+        // Arrange
+        var plateId = Guid.NewGuid();
+        var databaseContext = Substitute.For<IApplicationDbContext>();
+        var controller = new HomeController(databaseContext);
+
+        // Act
+        await controller.ReservePlates(plateId);
+
+        // Assert
+        await databaseContext.Received(1).ReservePlate(plateId);
+    }
 }
