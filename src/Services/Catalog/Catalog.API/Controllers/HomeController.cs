@@ -43,7 +43,21 @@ public class HomeController : Controller
     
     [HttpPost]
     [Route("/plates/reserve")]
-    public async Task<IActionResult> ReservePlates([FromBody] Guid plateId)
+    public async Task<IActionResult> ReservePlate([FromBody] Guid plateId)
+    {
+        return NoContent();
+    }
+    
+    [HttpPost]
+    [Route("/plates/sell")]
+    public async Task<IActionResult> SellPlate([FromBody] Guid plateId)
+    {
+        return NoContent();
+    }
+    
+    [HttpPost]
+    [Route("/plates/unreserve")]
+    public async Task<IActionResult> UnreservePlate([FromBody] Guid plateId)
     {
         return NoContent();
     }

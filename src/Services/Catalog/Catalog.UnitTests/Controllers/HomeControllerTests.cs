@@ -95,7 +95,7 @@ public class HomeControllerTests
     }
     
     [Fact]
-    public async Task ReservePlates_WhenCalled_ThenCallsDbContextWithPlateId()
+    public async Task ReservePlate_WhenRequested_ThenCallsDbContextWithPlateId()
     {
         // Arrange
         var plateId = Guid.NewGuid();
@@ -103,7 +103,37 @@ public class HomeControllerTests
         var controller = new HomeController(databaseContext);
 
         // Act
-        await controller.ReservePlates(plateId);
+        await controller.ReservePlate(plateId);
+
+        // Assert
+        await databaseContext.Received(1).ReservePlate(plateId);
+    }
+    
+    [Fact]
+    public async Task SellPlate_WhenRequested_ThenCallsDbContextWithPlateId()
+    {
+        // Arrange
+        var plateId = Guid.NewGuid();
+        var databaseContext = Substitute.For<IApplicationDbContext>();
+        var controller = new HomeController(databaseContext);
+
+        // Act
+        await controller.SellPlate(plateId);
+
+        // Assert
+        await databaseContext.Received(1).ReservePlate(plateId);
+    }
+    
+    [Fact]
+    public async Task UnreservePlate_WhenRequested_ThenCallsDbContextWithPlateId()
+    {
+        // Arrange
+        var plateId = Guid.NewGuid();
+        var databaseContext = Substitute.For<IApplicationDbContext>();
+        var controller = new HomeController(databaseContext);
+
+        // Act
+        await controller.UnreservePlate(plateId);
 
         // Assert
         await databaseContext.Received(1).ReservePlate(plateId);

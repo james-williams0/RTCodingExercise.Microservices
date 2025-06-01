@@ -2,6 +2,7 @@ namespace Catalog.Domain.Enums;
 
 public enum PlateStatuses
 {
-    Reserved = 0,
-    Sold = 1
+    None = 0,
+    Reserved = 1,
+    Sold = 2
 }

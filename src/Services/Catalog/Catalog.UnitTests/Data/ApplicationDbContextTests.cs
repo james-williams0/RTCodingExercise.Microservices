@@ -160,9 +160,9 @@ public class ApplicationDbContextTests
             Arg.Is<string>(s => s == searchTerm));
         Assert.Empty(result);
     }
-    
+
     [Fact]
-    public async Task ReservePlate_WhenCalledOnUnsoldPlate_AddsReservedStatusEntry()
+    public async Task GivenAReserveCommand_WhenPlateIsUnreservedAndUnsold_ThenReserveIt()
     {
         // Arrange
         var plate = GenerateRandomPlates(1).Single();
@@ -183,7 +183,29 @@ public class ApplicationDbContextTests
     }
     
     [Fact]
-    public async Task SellPlate_WhenCalledOnUnreservedPlate_AddsSoldStatusEntry()
+    public async Task GivenAReserveCommand_WhenPlateIsSold_ThenPlateIsStillSold()
+    {
+        // Arrange
+        var plate = GenerateRandomPlates(1).Single();
+        var database = Guid.NewGuid().ToString();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(database)
+            .Options;
+        await using var dbContext = new ApplicationDbContext(options, new PlateFuzzySearcher());
+        await dbContext.Plates.AddAsync(plate);
+        await dbContext.SaveChangesAsync();
+        await dbContext.SellPlate(plate.Id);
+
+        // Act
+        await dbContext.ReservePlate(plate.Id);
+
+        // Assert
+        var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
+        Assert.Equal(PlateStatuses.Sold, plateStatus.Status);
+    }
+    
+    [Fact]
+    public async Task GivenASellCommand_WhenPlateIsUnreservedAndUnsold_ThenPlateIsSold()
     {
         // Arrange
         var plate = GenerateRandomPlates(1).Single();
@@ -196,28 +218,77 @@ public class ApplicationDbContextTests
         await dbContext.SaveChangesAsync();
 
         // Act
-        await dbContext.SellPlate(plate.Id);
+        await dbContext.ReservePlate(plate.Id);
 
         // Assert
         var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
-        Assert.Equal(PlateStatuses.Reserved, plateStatus.Status);
+        Assert.Equal(PlateStatuses.Sold, plateStatus.Status);
     }
     
     [Fact]
-    public async Task SellPlate_WhenCalledOnReservedPlate_ChangesToSoldStatusEntry()
+    public async Task GivenASellCommand_WhenPlateIsReserved_ThenPlateIsSold()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var plate = GenerateRandomPlates(1).Single();
+        var database = Guid.NewGuid().ToString();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(database)
+            .Options;
+        await using var dbContext = new ApplicationDbContext(options, new PlateFuzzySearcher());
+        await dbContext.Plates.AddAsync(plate);
+        await dbContext.SaveChangesAsync();
+        await dbContext.SellPlate(plate.Id);
+        await dbContext.ReservePlate(plate.Id);
+
+        // Act
+        await dbContext.ReservePlate(plate.Id);
+
+        // Assert
+        var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
+        Assert.Equal(PlateStatuses.Sold, plateStatus.Status);
     }
     
     [Fact]
-    public async Task UnreservePlate_WhenCalledOnReservedPlate_RemovesStatusEntry()
+    public async Task GivenAnUnreserveCommand_WhenPlateIsReserved_ThenUnreserveIt()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var plate = GenerateRandomPlates(1).Single();
+        var database = Guid.NewGuid().ToString();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(database)
+            .Options;
+        await using var dbContext = new ApplicationDbContext(options, new PlateFuzzySearcher());
+        await dbContext.Plates.AddAsync(plate);
+        await dbContext.SaveChangesAsync();
+        await dbContext.ReservePlate(plate.Id);
+
+        // Act
+        await dbContext.UnreservePlate(plate.Id);
+
+        // Assert
+        var plateStatus = await dbContext.PlateStatuses.AnyAsync(p => p.Id == plate.Id);
+        Assert.False(plateStatus);
     }
     
     [Fact]
-    public async Task UnreservePlate_WhenCalledOnSoldPlate_ReturnsError()
+    public async Task GivenAnUnreserveCommand_WhenPlateIsSold_ThenRemainSold()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var plate = GenerateRandomPlates(1).Single();
+        var database = Guid.NewGuid().ToString();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(database)
+            .Options;
+        await using var dbContext = new ApplicationDbContext(options, new PlateFuzzySearcher());
+        await dbContext.Plates.AddAsync(plate);
+        await dbContext.SaveChangesAsync();
+        await dbContext.SellPlate(plate.Id);
+
+        // Act
+        await dbContext.UnreservePlate(plate.Id);
+
+        // Assert
+        var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
+        Assert.Equal(PlateStatuses.Sold, plateStatus.Status);
     }
 }
