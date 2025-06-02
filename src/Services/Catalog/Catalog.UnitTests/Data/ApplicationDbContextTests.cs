@@ -179,7 +179,7 @@ public class ApplicationDbContextTests
 
         // Assert
         var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
-        Assert.Equal(PlateStatuses.Reserved, plateStatus.Status);
+        Assert.Equal(PlateStatusOption.Reserved, plateStatus.Status);
     }
     
     [Fact]
@@ -201,7 +201,7 @@ public class ApplicationDbContextTests
 
         // Assert
         var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
-        Assert.Equal(PlateStatuses.Sold, plateStatus.Status);
+        Assert.Equal(PlateStatusOption.Sold, plateStatus.Status);
     }
     
     [Fact]
@@ -218,11 +218,11 @@ public class ApplicationDbContextTests
         await dbContext.SaveChangesAsync();
 
         // Act
-        await dbContext.ReservePlate(plate.Id);
+        await dbContext.SellPlate(plate.Id);
 
         // Assert
         var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
-        Assert.Equal(PlateStatuses.Sold, plateStatus.Status);
+        Assert.Equal(PlateStatusOption.Sold, plateStatus.Status);
     }
     
     [Fact]
@@ -245,7 +245,7 @@ public class ApplicationDbContextTests
 
         // Assert
         var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
-        Assert.Equal(PlateStatuses.Sold, plateStatus.Status);
+        Assert.Equal(PlateStatusOption.Sold, plateStatus.Status);
     }
     
     [Fact]
@@ -289,6 +289,28 @@ public class ApplicationDbContextTests
 
         // Assert
         var plateStatus = await dbContext.PlateStatuses.SingleAsync(p => p.Id == plate.Id);
-        Assert.Equal(PlateStatuses.Sold, plateStatus.Status);
+        Assert.Equal(PlateStatusOption.Sold, plateStatus.Status);
+    }
+    
+    [Fact]
+    public async Task GivenAStatusUpdateCommand_WhenPlateDoesNotExist_ThenThrowsException()
+    {
+        // Arrange
+        var plateId = Guid.NewGuid();
+        var database = Guid.NewGuid().ToString();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(database)
+            .Options;
+        await using var dbContext = new ApplicationDbContext(options, new PlateFuzzySearcher());
+
+        // Act
+        var reserve = () => dbContext.ReservePlate(plateId);
+        var sell = () => dbContext.SellPlate(plateId);
+        var unreserve = () => dbContext.UnreservePlate(plateId);
+        
+        // Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(reserve);
+        await Assert.ThrowsAsync<InvalidOperationException>(sell);
+        await Assert.ThrowsAsync<InvalidOperationException>(unreserve);
     }
 }

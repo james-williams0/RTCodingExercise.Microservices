@@ -1,5 +1,6 @@
 ﻿using Catalog.API.Services;
 using Catalog.Domain.Api.Requests.Enums;
+using Catalog.Domain.Enums;
 
 namespace Catalog.API.Data;
 
@@ -43,19 +44,75 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             : pagedPlates.ToList();
     }
 
-    public Task<bool> ReservePlate(Guid plateId)
+    public async Task<bool> ReservePlate(Guid plateId)
     {
-        throw new NotImplementedException();
+        var (plate, plateStatus) = GetPlateAndStatus(plateId);
+        
+        if (plateStatus is { Status: PlateStatusOption.Sold })
+        {
+            return false;
+        }
+
+        if (plateStatus == null)
+        {
+            await PlateStatuses.AddAsync(
+                new PlateStatus
+                {
+                    Id = plateId,
+                    Status = PlateStatusOption.Reserved,
+                    Plate = plate
+                });
+        }
+
+        await SaveChangesAsync();
+        return true;
     }
 
-    public Task<bool> SellPlate(Guid plateId)
+    public async Task<bool> SellPlate(Guid plateId)
     {
-        throw new NotImplementedException();
+        var (plate, plateStatus) = GetPlateAndStatus(plateId);
+        
+        if (plateStatus == null)
+        {
+            await PlateStatuses.AddAsync(
+                new PlateStatus
+                {
+                    Id = plateId,
+                    Status = PlateStatusOption.Sold,
+                    Plate = plate
+                });
+        }
+        else if (plateStatus.Status != PlateStatusOption.Sold)
+        {
+            plateStatus.Status = PlateStatusOption.Sold;
+            PlateStatuses.Update(plateStatus);
+        }
+
+        await SaveChangesAsync();
+        return true;
     }
 
-    public Task<bool> UnreservePlate(Guid plateId)
+    public async Task<bool> UnreservePlate(Guid plateId)
     {
-        throw new NotImplementedException();
+        var (plate, plateStatus) = GetPlateAndStatus(plateId);
+        
+        if (plateStatus == null)
+        {
+            await PlateStatuses.AddAsync(
+                new PlateStatus
+                {
+                    Id = plateId,
+                    Status = PlateStatusOption.Sold,
+                    Plate = plate
+                });
+        }
+        else if (plateStatus.Status == PlateStatusOption.Reserved)
+        {
+            PlateStatuses.Remove(plateStatus);
+        }
+
+        await SaveChangesAsync();
+        return true;
     }
 
     public async Task<int> GetTotalCount()
@@ -73,6 +130,18 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             (SortBy.Price, OrderBy.Desc) => plates.OrderByDescending(p => p.SalePrice),
             _ => plates.OrderBy(p => p.Registration)
         };
+    }
+    
+    private (Plate Plate, PlateStatus? PlateStatus) GetPlateAndStatus(Guid plateId)
+    {
+        var plate = Plates.Find(plateId);
+        if (plate == null)
+        {
+            throw new InvalidOperationException($"Plate with id {plateId} does not exist.");
+        }
+
+        var plateStatus = PlateStatuses.Find(plateId);
+        return (plate, plateStatus);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,6 +1,6 @@
 namespace Catalog.Domain.Enums;
 
-public enum PlateStatuses
+public enum PlateStatusOption
 {
     None = 0,
     Reserved = 1,

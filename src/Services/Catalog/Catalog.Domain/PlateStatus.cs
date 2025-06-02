@@ -6,7 +6,7 @@ public class PlateStatus
 {
     public Guid Id { get; init; }
         
-    public PlateStatuses Status { get; init; }
+    public PlateStatusOption Status { get; set; }
         
     public required Plate Plate { get; init; }
 }
