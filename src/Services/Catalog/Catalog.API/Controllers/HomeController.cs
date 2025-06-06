@@ -1,5 +1,6 @@
 ﻿using Catalog.Domain.Api.Requests;
 using Catalog.Domain.Api.Responses;
+using Catalog.Domain.Enums;
 
 namespace Catalog.API.Controllers;
 
@@ -31,9 +32,20 @@ public class HomeController : Controller
             request.OrderBy,
             request.SearchTerm);
         var totalCount = await _context.GetTotalCount();
+        var plateStatuses = await _context.GetPlateStatuses(plates.Select(plate => plate.Id).ToList());
+        var plateDtos = plates.Select(plate => new PlateDto
+        {
+            Id = plate.Id,
+            Registration = plate.Registration,
+            PurchasePrice = plate.PurchasePrice,
+            SalePrice = plate.SalePrice,
+            Letters = plate.Letters,
+            Numbers = plate.Numbers,
+            Status = plateStatuses.FirstOrDefault(plateStatus => plateStatus.Id == plate.Id)?.Status ?? PlateStatusOption.None
+        }).ToList();
         var response = new PlatesApiResponse
         {
-            Plates = plates,
+            Plates = plateDtos,
             PageNumber = request.PageNumber,
             PageSize = request.PageSize,
             TotalCount = totalCount
@@ -45,6 +57,7 @@ public class HomeController : Controller
     [Route("/plates/reserve")]
     public async Task<IActionResult> ReservePlate([FromBody] Guid plateId)
     {
+        await _context.ReservePlate(plateId);
         return NoContent();
     }
     
@@ -52,6 +65,7 @@ public class HomeController : Controller
     [Route("/plates/sell")]
     public async Task<IActionResult> SellPlate([FromBody] Guid plateId)
     {
+        await _context.ReservePlate(plateId);
         return NoContent();
     }
     
@@ -59,6 +73,7 @@ public class HomeController : Controller
     [Route("/plates/unreserve")]
     public async Task<IActionResult> UnreservePlate([FromBody] Guid plateId)
     {
+        await _context.ReservePlate(plateId);
         return NoContent();
     }
 }

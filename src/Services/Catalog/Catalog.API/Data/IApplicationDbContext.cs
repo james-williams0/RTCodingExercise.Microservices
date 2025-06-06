@@ -11,6 +11,8 @@ public interface IApplicationDbContext
         OrderBy orderBy = OrderBy.Asc,
         string? searchTerm = null);
     
+    Task<List<PlateStatus>> GetPlateStatuses(List<Guid> plateIds);
+    
     Task<bool> ReservePlate(Guid plateId);
     
     Task<bool> SellPlate(Guid plateId);

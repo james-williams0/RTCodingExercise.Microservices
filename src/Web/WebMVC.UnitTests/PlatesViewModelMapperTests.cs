@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Catalog.Domain;
 using Catalog.Domain.Api.Responses;
+using Catalog.Domain.Enums;
 using RTCodingExercise.Microservices.Services;
 
 namespace WebMVC.UnitTests;
@@ -16,19 +17,20 @@ public class PlatesViewModelMapperTests
         int pageSize)
     {
         var random = new Random(418);
-        var plates = new List<Plate>();
+        var plates = new List<PlateDto>();
         for (var i = 0; i < pageSize; i++)
         {
             var letters = Guid.NewGuid().ToString();
             var numbers = random.Next(1000, 9999);
-            plates.Add(new Plate
+            plates.Add(new PlateDto
             {
                 Id = Guid.NewGuid(),
                 Registration = $"{letters}{numbers}",
                 PurchasePrice = random.Next(1000, 9999),
                 SalePrice = random.Next(1000, 9999),
                 Letters = letters,
-                Numbers = numbers
+                Numbers = numbers,
+                Status = PlateStatusOption.None
             });
         }
         return new PlatesApiResponse

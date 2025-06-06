@@ -11,6 +11,15 @@ public interface ICatalogApi
 {
     [Get("/plates")]
     Task<PlatesApiResponse> GetPagedPlatesAsync([Query] PlatesApiRequest request);
+
+    [Post("/plates/reserve")]
+    Task ReservePlateAsync([Body] Guid plateId);
+
+    [Post("/plates/sell")]
+    Task SellPlateAsync([Body] Guid plateId);
+
+    [Post("/plates/unreserve")]
+    Task UnreservePlateAsync([Body] Guid plateId);
 }
 
 public class PlatesApiService
@@ -47,5 +56,20 @@ public class PlatesApiService
             OrderBy = orderBy,
             SearchTerm = searchTerm
         };
+    }
+
+    public async Task ReservePlateAsync(Guid plateId)
+    {
+        await _catalogApi.ReservePlateAsync(plateId);
+    }
+
+    public async Task SellPlateAsync(Guid plateId)
+    {
+        await _catalogApi.SellPlateAsync(plateId);
+    }
+
+    public async Task UnreservePlateAsync(Guid plateId)
+    {
+        await _catalogApi.UnreservePlateAsync(plateId);
     }
 }

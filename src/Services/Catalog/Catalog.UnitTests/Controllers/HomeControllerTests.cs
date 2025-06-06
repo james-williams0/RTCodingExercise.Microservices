@@ -5,6 +5,7 @@ using Catalog.API.Controllers;
 using Catalog.API.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Catalog.Domain;
 using Catalog.Domain.Api.Requests;
@@ -48,7 +49,11 @@ public class HomeControllerTests
         
         var expectedResponse = new PlatesApiResponse
         {
-            Plates = expectedPlates,
+            Plates = expectedPlates.Select(plate => new PlateDto
+            {
+                Id = plate.Id,
+                Registration = plate.Registration
+            }).ToList(),
             PageNumber = pageNumber,
             PageSize = pageSize,
             TotalCount = expectedPlates.Count

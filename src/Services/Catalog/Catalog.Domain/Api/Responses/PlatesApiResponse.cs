@@ -2,7 +2,7 @@
 
 public record PlatesApiResponse
 {
-    public required List<Plate> Plates { get; init; }
+    public required List<PlateDto> Plates { get; init; }
     
     public required int PageNumber { get; init; }
     

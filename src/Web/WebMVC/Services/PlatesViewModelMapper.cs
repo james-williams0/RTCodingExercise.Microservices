@@ -10,7 +10,7 @@ public interface IPlateViewModelMapper
 
 public class PlatesViewModelMapper : IPlateViewModelMapper
 {
-    private static PlateViewModel Map(Plate plate)
+    private static PlateViewModel Map(PlateDto plate)
     {
         return new PlateViewModel
         {

@@ -25,13 +25,13 @@ public class PlatesApiServiceTests
         {
             Plates =
             [
-                new Plate
+                new PlateDto
                 {
                     Registration = Guid.NewGuid().ToString(),
                     PurchasePrice = random.Next(1000, 9000),
                     SalePrice = random.Next(1000, 9000)
                 },
-                new Plate
+                new PlateDto
                 {
                     Registration = Guid.NewGuid().ToString(),
                     PurchasePrice = random.Next(1000, 9000),

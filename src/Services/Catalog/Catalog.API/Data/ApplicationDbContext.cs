@@ -44,6 +44,13 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             : pagedPlates.ToList();
     }
 
+    public Task<List<PlateStatus>> GetPlateStatuses(List<Guid> plateIds)
+    {
+        return PlateStatuses
+            .Where(plateStatuses => plateIds.Contains(plateStatuses.Id))
+            .ToListAsync();
+    }
+
     public async Task<bool> ReservePlate(Guid plateId)
     {
         var (plate, plateStatus) = GetPlateAndStatus(plateId);

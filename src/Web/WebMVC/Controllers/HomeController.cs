@@ -47,4 +47,43 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+    [HttpPost]
+    public async Task<IActionResult> Reserve(
+        Guid plateId,
+        int pageNumber = 1,
+        int pageSize = 20,
+        string sortBy = "Alphabetical",
+        string orderBy = "Asc",
+        string? searchTerm = null)
+    {
+        await _platesApiService.ReservePlateAsync(plateId);
+        return RedirectToAction("Index", new { pageNumber, pageSize, sortBy, orderBy, searchTerm });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Sell(
+        Guid plateId,
+        int pageNumber = 1,
+        int pageSize = 20,
+        string sortBy = "Alphabetical",
+        string orderBy = "Asc",
+        string? searchTerm = null)
+    {
+        await _platesApiService.SellPlateAsync(plateId);
+        return RedirectToAction("Index", new { pageNumber, pageSize, sortBy, orderBy, searchTerm });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Unreserve(
+        Guid plateId,
+        int pageNumber = 1,
+        int pageSize = 20,
+        string sortBy = "Alphabetical",
+        string orderBy = "Asc",
+        string? searchTerm = null)
+    {
+        await _platesApiService.UnreservePlateAsync(plateId);
+        return RedirectToAction("Index", new { pageNumber, pageSize, sortBy, orderBy, searchTerm });
+    }
 }
