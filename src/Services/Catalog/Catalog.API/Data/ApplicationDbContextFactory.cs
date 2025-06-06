@@ -1,22 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore.Design;
+﻿using Catalog.API.Services;
+using Microsoft.EntityFrameworkCore.Design;
 
-namespace Catalog.API.Data
+namespace Catalog.API.Data;
+
+public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
 {
-    public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+    private readonly IPlateFuzzySearcher _plateFuzzySearcher;
+
+    public ApplicationDbContextFactory(IPlateFuzzySearcher plateFuzzySearcher)
     {
-        public ApplicationDbContext CreateDbContext(string[] args)
-        {
-            var config = new ConfigurationBuilder()
-               .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
-               .AddJsonFile("appsettings.json")
-               .AddEnvironmentVariables()
-               .Build();
+        _plateFuzzySearcher = plateFuzzySearcher;
+    }
+    
+    public ApplicationDbContext CreateDbContext(string[] args)
+    {
+        var config = new ConfigurationBuilder()
+            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory()))
+            .AddJsonFile("appsettings.json")
+            .AddEnvironmentVariables()
+            .Build();
 
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
-            optionsBuilder.UseSqlServer(config["ConnectionString"], sqlServerOptionsAction: o => o.MigrationsAssembly("Catalog.API"));
+        optionsBuilder.UseSqlServer(config["ConnectionString"], sqlServerOptionsAction: o => o.MigrationsAssembly("Catalog.API"));
 
-            return new ApplicationDbContext(optionsBuilder.Options);
-        }
+        return new ApplicationDbContext(optionsBuilder.Options, _plateFuzzySearcher);
     }
 }

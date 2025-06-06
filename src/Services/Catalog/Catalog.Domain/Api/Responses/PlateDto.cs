@@ -1,6 +1,8 @@
-﻿namespace Catalog.Domain;
+﻿using Catalog.Domain.Enums;
 
-public record Plate
+namespace Catalog.Domain.Api.Responses;
+
+public record PlateDto
 {
     public Guid Id { get; init; }
 
@@ -13,4 +15,6 @@ public record Plate
     public string? Letters { get; init; }
 
     public int Numbers { get; init; }
+
+    public PlateStatusOption Status { get; init; } = PlateStatusOption.None;
 }

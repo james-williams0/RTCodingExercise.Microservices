@@ -1,10 +1,63 @@
-﻿@model List<Catalog.Domain.Plate>
+﻿@model RTCodingExercise.Microservices.Models.PlatesViewModel
 
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Number Plates</h1>
 </div>
+
+<form method="get">
+    <div class="input-group">
+        <input type="text" name="searchTerm" class="form-control" placeholder="Search" value="@Model.SearchTerm" />
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a href="?sortBy=Alphabetical&orderBy=@(Model is { SortBy: "Alphabetical", OrderBy: "Asc" } ? "Desc" : "Asc")&pageNumber=@Model.PageNumber&pageSize=@Model.PageSize">
+                    Registration
+                    @if (Model.SortBy == "Alphabetical") {
+                        <span>(@((Model.OrderBy == "Asc") ? "Ascending" : "Descending"))</span>
+                    }
+                </a>
+            </th>
+            <th>Purchase Price</th>
+            <th>
+                <a href="?sortBy=Price&orderBy=@(Model is { SortBy: "Price", OrderBy: "Asc" } ? "Desc" : "Asc")&pageNumber=@Model.PageNumber&pageSize=@Model.PageSize">
+                    Sale Price
+                    @if (Model.SortBy == "Price") {
+                        <span>(@((Model.OrderBy == "Asc") ? "Ascending" : "Descending"))</span>
+                    }
+                </a>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var plate in Model.Plates)
+    {
+        <tr>
+            <td>@plate.Registration</td>
+            <td>@plate.PurchasePrice</td>
+            <td>@plate.DisplayPrice.ToString("F2")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination justify-content-center">
+        <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+            <a class="page-link" href="?pageNumber=@(Model.PageNumber - 1)&pageSize=@Model.PageSize">Previous</a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">Page @Model.PageNumber of @Model.TotalPages</span>
+        </li>
+        <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+            <a class="page-link" href="?pageNumber=@(Model.PageNumber + 1)&pageSize=@Model.PageSize">Next</a>
+        </li>
+    </ul>
+</nav>

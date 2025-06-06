@@ -1,6 +1,5 @@
-﻿namespace WebMVC
+﻿namespace WebMVC;
+
+public class AppSettings
 {
-    public class AppSettings
-    {
-    }
 }

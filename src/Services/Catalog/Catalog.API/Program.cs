@@ -8,14 +8,14 @@ Log.Logger = CreateSerilogLogger(configuration);
 try
 {
     Log.Information("Configuring web host ({ApplicationContext})...", AppName);
-    var host = BuildWebHost(configuration, args);
+    var host = BuildHost(configuration, args);
 
     Log.Information("Applying migrations ({ApplicationContext})...", AppName);
     host.MigrateDbContext<ApplicationDbContext>((context, services) =>
     {
-        var env = services.GetService<IWebHostEnvironment>();
-        var logger = services.GetService<ILogger<ApplicationDbContextSeed>>();
-        var settings = services.GetService<IOptions<AppSettings>>();
+        var env = services.GetRequiredService<IWebHostEnvironment>();
+        var logger = services.GetRequiredService<ILogger<ApplicationDbContextSeed>>();
+        var settings = services.GetRequiredService<IOptions<AppSettings>>();
 
         new ApplicationDbContextSeed()
             .SeedAsync(context, env, logger, settings)
@@ -37,13 +37,17 @@ finally
     Log.CloseAndFlush();
 }
 
-IWebHost BuildWebHost(IConfiguration configuration, string[] args) =>
-    WebHost.CreateDefaultBuilder(args)
-        .CaptureStartupErrors(false)
-        .ConfigureAppConfiguration(x => x.AddConfiguration(configuration))
-        .UseStartup<Startup>()
-        .UseContentRoot(Directory.GetCurrentDirectory())
+IHost BuildHost(IConfiguration configuration, string[] args) =>
+    Host.CreateDefaultBuilder(args)
         .UseSerilog()
+        .ConfigureAppConfiguration(x => x.AddConfiguration(configuration))
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder
+                .CaptureStartupErrors(false)
+                .UseStartup<Startup>()
+                .UseContentRoot(Directory.GetCurrentDirectory());
+        })
         .Build();
 
 Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
@@ -56,7 +60,9 @@ Serilog.ILogger CreateSerilogLogger(IConfiguration configuration)
         .Enrich.FromLogContext()
         .WriteTo.Console()
         .WriteTo.Seq(string.IsNullOrWhiteSpace(seqServerUrl) ? "http://seq" : seqServerUrl)
-        .WriteTo.Http(string.IsNullOrWhiteSpace(logstashUrl) ? "http://localhost:8080" : logstashUrl)
+        .WriteTo.Http(
+            requestUri: string.IsNullOrWhiteSpace(logstashUrl) ? "http://localhost:8080" : logstashUrl,
+            queueLimitBytes: null)
         .ReadFrom.Configuration(configuration)
         .CreateLogger();
 }
@@ -72,3 +78,4 @@ IConfiguration GetConfiguration()
 
     return builder.Build();
 }
+
